@@ -1,189 +1,314 @@
-# Interview Bot Backend
+# InterviewIQ Backend
 
-A production-ready FastAPI backend for an AI-powered interview practice chatbot with BERT-based semantic analysis.
+FastAPI backend for an interview practice chatbot that scores answers using a mix of keyword matching and semantic similarity.
 
-## Features
+## What It Does
 
-- **Multi-user Session Support**: Session-based conversations with unique IDs
-- **Advanced BERT Analysis**: Uses sentence-transformers with all-MiniLM-L6-v2 model for semantic similarity
-- **Dual Scoring System**: Combines keyword-based matching (40%) with BERT semantic similarity (60%)
-- **Smart Feedback Generation**: Context-aware feedback based on semantic understanding levels
-- **Modular Architecture**: Clean separation of concerns with routes, services, models, and utilities
-- **Structured API Responses**: Consistent response format with status, data, and messages
-- **Error Handling**: Comprehensive error handling with proper HTTP status codes
-- **Logging**: Request/response logging for monitoring and debugging
-- **Performance Optimization**: Global BERT model loading and efficient embeddings
+- Serves interview questions from `questions.json`
+- Tracks each user's session in memory
+- Evaluates answers with:
+  - keyword coverage
+  - semantic similarity using `sentence-transformers`
+- Returns feedback, scores, and weak-topic summaries
 
-## API Endpoints
+## Tech Stack
 
-### GET /api/v1/question
-Get a random interview question.
+- FastAPI
+- Pydantic
+- NLTK
+- sentence-transformers
+- PyTorch
+- NumPy
 
-**Response:**
-```json
-{
-  "status": "success",
-  "data": {
-    "question": "What is Object-Oriented Programming (OOP)?",
-    "question_id": "123456789",
-    "session_id": "session-uuid"
-  }
-}
+## Project Structure
+
+```text
+backend/
+|-- main.py
+|-- config.py
+|-- dependencies.py
+|-- utils.py
+|-- questions.json
+|-- requirements.txt
+|-- test_api.py
+|-- test_import.py
+|-- models/
+|   `-- schemas.py
+|-- routes/
+|   `-- interview.py
+`-- services/
+    |-- analyzer.py
+    `-- session.py
 ```
 
-### POST /api/v1/answer
-Submit an answer for evaluation with BERT-based semantic scoring.
+## Setup
 
-**Request:**
-```json
-{
-  "answer": "Object-oriented programming uses classes and objects with inheritance and polymorphism",
-  "session_id": "optional-session-id"
-}
+### 1. Create and activate a virtual environment
+
+```powershell
+cd backend
+python -m venv venv
+.\venv\Scripts\activate
 ```
 
-**Response:**
-```json
-{
-  "status": "success",
-  "data": {
-    "keyword_score": 0.75,
-    "semantic_score": 0.82,
-    "final_score": 0.79,
-    "matched": ["class", "object", "inheritance"],
-    "missing": ["polymorphism", "encapsulation"],
-    "feedback": "Strong conceptual answer! 🎉 You have excellent understanding of the core concepts."
-  }
-}
-```
-    "matched": ["class", "object", "inheritance"],
-    "missing": ["polymorphism"],
-    "keyword_score": 0.75,
-    "semantic_score": 0.886,
-    "final_score": 0.818,
-    "score": 0.818
-  }
-}
-```
+### 2. Install dependencies
 
-### GET /api/v1/summary
-Get session performance summary.
-
-**Response:**
-```json
-{
-  "status": "success",
-  "data": {
-    "average_score": 0.75,
-    "weak_topics": ["inheritance", "polymorphism"],
-    "questions_answered": 4
-  }
-}
-```
-
-### POST /api/v1/reset
-Reset session data.
-
-**Response:**
-```json
-{
-  "status": "success",
-  "data": {
-    "message": "Session reset successfully"
-  }
-}
-```
-```json
-{
-  "status": "success",
-  "data": {
-    "average_score": 0.75,
-    "weak_topics": ["inheritance", "polymorphism"],
-    "questions_answered": 4
-  }
-}
-```
-
-### POST /api/reset
-Reset session data.
-
-**Response:**
-```json
-{
-  "status": "success",
-  "data": {
-    "message": "Session reset successfully"
-  }
-}
-```
-
-## Installation
-
-1. Install dependencies:
-```bash
+```powershell
 pip install -r requirements.txt
 ```
 
-2. Run the server:
-```bash
+### 3. Install NLTK data
+
+The backend expects `wordnet` and `stopwords`.
+
+```powershell
+python -c "import nltk; nltk.download('wordnet'); nltk.download('stopwords')"
+```
+
+Note: `main.py` currently appends `C:/Users/KULKA/nltk_data` to the NLTK search path, so if you use a different machine or username, you may want to make that path configurable.
+
+### 4. Start the server
+
+```powershell
 uvicorn main:app --reload
 ```
 
-The BERT model (all-MiniLM-L6-v2) will be downloaded automatically on first startup.
+App URLs:
 
-## Configuration
+- API root: `http://127.0.0.1:8000/`
+- Swagger docs: `http://127.0.0.1:8000/docs`
+- Health check: `http://127.0.0.1:8000/health`
 
-Questions are loaded from `questions.json` at startup. Each question should have:
+## API Endpoints
+
+### `GET /`
+
+Basic status response.
+
+Example response:
 
 ```json
 {
-  "question": "What is Object-Oriented Programming (OOP)?",
-  "keywords": ["class", "object", "inheritance", "polymorphism", "encapsulation", "abstraction"],
-  "synonyms": {
-    "class": ["classes"],
-    "object": ["objects", "instance"],
-    "inheritance": ["inherit", "inherits"]
-  },
-  "ideal_answer": "Object-oriented programming (OOP) is a programming paradigm based on the concept of objects, which can contain data and code. It uses classes as blueprints for creating objects, and supports four key principles: encapsulation (bundling data and methods), inheritance (classes can inherit properties from parent classes), polymorphism (objects can take many forms), and abstraction (hiding complex implementation details)."
+  "status": "healthy",
+  "message": "InterviewIQ API running",
+  "docs": "/docs"
 }
 ```
 
-## Scoring Algorithm
+### `GET /health`
 
-The system combines two analysis methods:
+Returns service health and version.
 
-1. **Keyword Analysis** (40% weight): Matches keywords with synonyms and fuzzy matching
-2. **Semantic Analysis** (60% weight): Uses BERT embeddings to compare conceptual similarity with ideal answers
+### `GET /debug`
 
-**Final Score** = (0.4 × keyword_score) + (0.6 × semantic_score)
+Returns registered routes for quick debugging.
 
-## Dependencies
+### `GET /api/v1/categories`
 
-- **sentence-transformers** with `all-MiniLM-L6-v2` model for BERT-based semantic similarity
-- **NLTK** for lemmatization and stopwords
-- **FastAPI** for the web framework
-- **PyTorch** for BERT model inference
+Returns the available question categories loaded from `questions.json`.
 
-## Architecture
+Example response:
 
-```
-backend/
-├── main.py              # FastAPI app with BERT model loading
-├── config.py            # Question loading and configuration
-├── dependencies.py      # Dependency injection utilities
-├── utils.py             # NLP utilities and helpers
-├── models/
-│   └── schemas.py       # Pydantic models with semantic fields
-├── routes/
-│   └── interview.py     # API endpoints with comprehensive analysis
-└── services/
-    ├── analyzer.py      # Dual keyword + BERT semantic analysis
-    └── session.py       # Session management
+```json
+{
+  "status": "success",
+  "data": {
+    "categories": ["General", "Python"]
+  }
+}
 ```
 
-## Development
+### `GET /api/v1/question`
 
-- Uses FastAPI with automatic OpenAPI documentation at `/docs`
-- BERT model loaded once at startup for performance
-- Comprehensive logging for debugging semantic analysis
-- Modular design for easy testing and extension
+Returns a random question and creates or reuses a session.
+
+Query params:
+
+- `category` optional
+- `session_id` optional
+
+Example response:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "question": "What is OOP?",
+    "question_id": "123456789",
+    "session_id": "f7c0e1d3-7a6d-4d0f-9dbb-123456789abc",
+    "category": "General"
+  }
+}
+```
+
+### `POST /api/v1/answer`
+
+Checks the answer for the current session question.
+
+Request body:
+
+```json
+{
+  "answer": "OOP uses classes and objects with inheritance and polymorphism.",
+  "session_id": "f7c0e1d3-7a6d-4d0f-9dbb-123456789abc"
+}
+```
+
+Example response:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "feedback": "Strong conceptual answer!",
+    "matched": ["class", "object", "inheritance"],
+    "missing": ["polymorphism"],
+    "keyword_score": 0.75,
+    "semantic_score": 0.88,
+    "final_score": 0.83,
+    "score": 0.83
+  }
+}
+```
+
+### `GET /api/v1/summary`
+
+Returns session performance summary.
+
+Query params:
+
+- `session_id` optional
+
+Example response:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "average_score": 0.78,
+    "weak_topics": ["polymorphism", "abstraction"],
+    "questions_answered": 4
+  }
+}
+```
+
+### `POST /api/v1/reset`
+
+Resets session statistics.
+
+Query params:
+
+- `session_id` optional
+
+Example response:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "message": "Session reset successfully"
+  }
+}
+```
+
+## Scoring Logic
+
+Answer evaluation combines two signals:
+
+- Keyword score: `40%`
+- Semantic score: `60%`
+
+Formula:
+
+```text
+final_score = (0.4 * keyword_score) + (0.6 * semantic_score)
+```
+
+### Keyword analysis
+
+- lowercases and tokenizes the user answer
+- removes stopwords
+- lemmatizes words using NLTK
+- expands configured synonyms
+- uses a lightweight similarity check for near matches
+
+### Semantic analysis
+
+- loads `all-MiniLM-L6-v2` through `SentenceTransformer`
+- generates embeddings for the user answer and ideal answer
+- computes cosine similarity
+
+If no ideal answer is present, semantic score falls back to `0.0`.
+
+## Question File Format
+
+Questions are loaded from `questions.json`.
+
+Supported shape:
+
+```json
+{
+  "questions": [
+    {
+      "question": "What is OOP?",
+      "category": "General",
+      "keywords": ["class", "object", "inheritance", "polymorphism"],
+      "synonyms": {
+        "class": ["classes"],
+        "object": ["objects", "instance"]
+      },
+      "ideal_answer": "Object-oriented programming is a programming paradigm based on objects and classes."
+    }
+  ]
+}
+```
+
+The loader also supports a category-grouped JSON object and normalizes it internally.
+
+## Session Behavior
+
+- Sessions are stored in memory in `services/session.py`
+- A new UUID is created if no valid `session_id` is provided
+- Session data is lost when the server restarts
+
+For production, replace in-memory storage with Redis or a database.
+
+## Test Scripts
+
+### Import test
+
+```powershell
+python test_import.py
+```
+
+Checks whether the backend imports cleanly.
+
+### API smoke test
+
+```powershell
+python test_api.py
+```
+
+Sends requests to a locally running server at `http://localhost:8000`.
+
+## Known Notes
+
+- The BERT model is loaded on startup and may download on first run.
+- NLTK resources must be installed separately.
+- CORS is currently open to all origins.
+- Logging and some user-facing strings in the codebase still contain encoding artifacts that may be worth cleaning up later.
+
+## Requirements
+
+Current dependencies from `requirements.txt`:
+
+```text
+fastapi==0.116.2
+uvicorn==0.36.0
+pydantic==2.11.9
+nltk==3.9.4
+sentence-transformers==2.7.0
+torch>=2.0.0
+numpy>=1.21.0
+python-multipart==0.0.20
+```
