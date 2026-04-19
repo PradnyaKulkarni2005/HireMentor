@@ -1,156 +1,135 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-import random
+import logging
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from nltk.stem import WordNetLemmatizer
+from fastapi.responses import JSONResponse
+
+from routes.interview import router as interview_router
+from services.analyzer import load_bert_model
+
 import nltk
 
-lemmatizer = WordNetLemmatizer()
-wordnet_available = True
-try:
-    nltk.data.find("corpora/wordnet")
-except LookupError:
-    wordnet_available = False
+# ================================
+# 🧠 NLTK CONFIG (IMPORTANT)
+# ================================
 
-app = FastAPI()
+# Set custom path (adjust if needed)
+nltk.data.path.append("C:/Users/KULKA/nltk_data")
 
-# ✅ Enable CORS
+# ================================
+# 🪵 LOGGING CONFIG
+# ================================
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+logger = logging.getLogger(__name__)
+
+# ================================
+# 🚀 FASTAPI APP
+# ================================
+
+app = FastAPI(
+    title="InterviewIQ API",
+    description="AI-powered interview preparation system with semantic analysis",
+    version="2.1.0"
+)
+
+# ================================
+# 🌐 CORS CONFIG
+# ================================
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # change in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ✅ Questions
-questions = [
-    {
-        "question": "What is OOP?",
-        "keywords": ["class", "object", "inheritance", "polymorphism"]
-    },
-    {
-        "question": "What is a database?",
-        "keywords": ["data", "storage", "structured"]
-    }
-]
-
-# ✅ Store current question
-current_question = {}
-
-# ✅ Session tracking
-session = {
-    "score": 0,
-    "questions_answered": 0,
-    "weak_topics": {}
-}
-
-# ✅ Request model
-class Answer(BaseModel):
-    answer: str
-
-
-
-#  Helper Functions
-
-
-def analyze_answer(user_answer, keywords):
-    matched = []
-    missing = []
-
-    words = user_answer.lower().split()
-    normalized_words = []
-    for w in words:
-        try:
-            normalized_words.append(lemmatizer.lemmatize(w))
-        except LookupError:
-            normalized_words.append(w)
-
-    for word in keywords:
-        if word in normalized_words:
-            matched.append(word)
-        else:
-            missing.append(word)
-
-    score = len(matched) / len(keywords)
-
-    return score, matched, missing
-
-
-def generate_feedback(score, matched, missing):
-    if score > 0.7:
-        return f"Good answer 👍 You covered: {', '.join(matched)}."
-    elif score > 0.4:
-        return f"Decent answer. You mentioned {', '.join(matched)}, but missed {', '.join(missing)}."
-    else:
-        return f"You should include key concepts like {', '.join(missing)}."
-
-
 # ================================
-# 📌 API ROUTES
+# 🔗 ROUTES
 # ================================
 
-@app.get("/question")
-def get_question():
-    global current_question
-    current_question = random.choice(questions)
-    return {"question": current_question["question"]}
+API_PREFIX = "/api/v1"
 
+app.include_router(
+    interview_router,
+    prefix=API_PREFIX,
+    tags=["interview"]
+)
 
-@app.post("/answer")
-def check_answer(ans: Answer):
-    # ❗ Safety check
-    if not current_question:
-        return {"error": "No question asked yet"}
+# ================================
+# ⚡ STARTUP EVENT
+# ================================
 
-    score, matched, missing = analyze_answer(
-        ans.answer,
-        current_question["keywords"]
-    )
+@app.on_event("startup")
+async def startup_event():
+    logger.info("🚀 Starting InterviewIQ API...")
 
-    feedback = generate_feedback(score, matched, missing)
+    # Load BERT model
+    try:
+        load_bert_model()
+        logger.info("✅ BERT model loaded successfully on startup")
+    except Exception as e:
+        logger.error(f"❌ BERT model load failed: {e}")
 
-    # ✅ Update session
-    session["questions_answered"] += 1
-    session["score"] += score
+    # Verify NLTK data
+    try:
+        nltk.data.find("corpora/wordnet")
+        nltk.data.find("corpora/stopwords")
+        logger.info("✅ NLTK data verified")
+    except LookupError:
+        logger.warning("⚠️ NLTK data missing. Install manually.")
 
-    for topic in missing:
-        session["weak_topics"][topic] = session["weak_topics"].get(topic, 0) + 1
+# ================================
+# 🏠 ROOT ENDPOINT
+# ================================
 
+@app.get("/")
+def root():
     return {
-        "feedback": feedback,
-        "matched": matched,
-        "missing": missing,
-        "score": score
+        "status": "healthy",
+        "message": "InterviewIQ API running 🚀",
+        "docs": "/docs"
     }
 
+# ================================
+# ❤️ HEALTH CHECK
+# ================================
 
-@app.get("/summary")
-def get_summary():
-    if session["questions_answered"] == 0:
-        return {"message": "No data yet"}
-
-    avg_score = session["score"] / session["questions_answered"]
-
-    weak = sorted(
-        session["weak_topics"],
-        key=session["weak_topics"].get,
-        reverse=True
-    )
-
+@app.get("/health")
+def health():
     return {
-        "average_score": round(avg_score, 2),
-        "weak_topics": weak[:3],
-        "questions_answered": session["questions_answered"]
+        "status": "healthy",
+        "version": "2.1.0",
+        "ready": True
     }
 
+# ================================
+# 🐞 DEBUG ROUTE
+# ================================
 
-@app.post("/reset")
-def reset_session():
-    global session
-    session = {
-        "score": 0,
-        "questions_answered": 0,
-        "weak_topics": {}
+@app.get("/debug")
+def debug():
+    return {
+        "status": "running",
+        "routes": [route.path for route in app.routes]
     }
-    return {"message": "Session reset successfully"}
+
+# ================================
+# ❌ GLOBAL ERROR HANDLER
+# ================================
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"❌ Error: {exc}")
+
+    return JSONResponse(
+        status_code=500,
+        content={
+            "status": "error",
+            "message": "Internal server error"
+        }
+    )

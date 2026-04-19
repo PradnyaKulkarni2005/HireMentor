@@ -1,0 +1,143 @@
+﻿{
+  "oop": [
+    {
+      "question": "What is Object-Oriented Programming (OOP)?",
+      "keywords": ["class", "object", "inheritance", "polymorphism", "encapsulation", "abstraction"],
+      "synonyms": {
+        "class": ["classes"],
+        "object": ["objects", "instance", "instances"],
+        "inheritance": ["inherit", "inherits"],
+        "polymorphism": ["poly", "multiple forms"],
+        "encapsulation": ["encapsulate", "data hiding"],
+        "abstraction": ["abstract", "abstracting"]
+      },
+      "ideal_answer": "Object-oriented programming (OOP) is a programming paradigm based on objects that contain data and behavior. It uses classes to define object blueprints and supports encapsulation, inheritance, polymorphism, and abstraction."
+    },
+    {
+      "question": "What is polymorphism?",
+      "keywords": ["polymorphism", "multiple forms", "method overriding", "interfaces", "dynamic dispatch"],
+      "ideal_answer": "Polymorphism is the ability of different objects to be treated as instances of the same type, while behaving differently based on their concrete implementation. It allows one interface to support multiple underlying forms, commonly through inheritance, interfaces, or method overriding."
+    },
+    {
+      "question": "Difference between abstraction and encapsulation",
+      "keywords": ["abstraction", "encapsulation", "interface", "implementation", "data hiding"],
+      "ideal_answer": "Abstraction hides complex implementation details and exposes only necessary behavior, while encapsulation bundles data and methods together and controls access to internal state. Abstraction is about what an object does, and encapsulation is about how it keeps its data safe."
+    },
+    {
+      "question": "What is method overloading vs overriding?",
+      "keywords": ["overloading", "overriding", "compile-time polymorphism", "run-time polymorphism", "same name"],
+      "ideal_answer": "Method overloading defines multiple methods with the same name but different parameters in the same class, enabling compile-time polymorphism. Method overriding provides a new implementation of a base class method in a derived class, enabling runtime polymorphism."
+    },
+    {
+      "question": "What is an interface?",
+      "keywords": ["interface", "contract", "abstract", "polymorphism", "implementation"],
+      "ideal_answer": "An interface is a contract that defines a set of methods without implementing them. Classes implement the interface by providing concrete behavior, allowing different types to be used interchangeably through a common API."
+    }
+  ],
+  "database": [
+    {
+      "question": "What is a database?",
+      "keywords": ["data", "storage", "structured", "query", "schema", "tables"],
+      "ideal_answer": "A database is a structured collection of data designed to store, retrieve, and manage information efficiently. It organizes data using schemas, tables, or other models and supports queries to access and manipulate records."
+    },
+    {
+      "question": "What is indexing?",
+      "keywords": ["index", "query", "performance", "lookup", "search"],
+      "ideal_answer": "Indexing is a database optimization technique that creates a separate data structure to speed up data retrieval operations. It reduces the amount of data scanned during a query and improves lookup performance for frequently accessed columns."
+    },
+    {
+      "question": "What is ACID property?",
+      "keywords": ["ACID", "atomicity", "consistency", "isolation", "durability"],
+      "ideal_answer": "ACID is a set of properties that guarantee reliable database transactions: atomicity ensures all-or-nothing execution, consistency preserves valid states, isolation separates concurrent transactions, and durability ensures committed changes are saved permanently."
+    },
+    {
+      "question": "What is JOIN? Types of JOINs?",
+      "keywords": ["JOIN", "inner join", "left join", "right join", "outer join", "combine", "tables"],
+      "ideal_answer": "A JOIN combines rows from two or more tables based on a related column between them. Common types include INNER JOIN (returns matching rows), LEFT JOIN (returns all left table rows plus matches), RIGHT JOIN (returns all right table rows plus matches), and FULL OUTER JOIN (returns all rows from both tables with matches where available)."
+    },
+    {
+      "question": "What is primary key vs foreign key?",
+      "keywords": ["primary key", "foreign key", "unique", "reference", "relationship"],
+      "ideal_answer": "A primary key uniquely identifies each record in a table, while a foreign key is a field that references the primary key of another table. Primary keys enforce row uniqueness, and foreign keys enforce relationships between tables."
+    },
+    {
+      "question": "What is the difference between SQL and NoSQL databases?",
+      "keywords": ["SQL", "NoSQL", "relational", "schema", "flexible", "ACID"],
+      "ideal_answer": "SQL databases are relational and use a fixed schema with structured tables and ACID transactions. NoSQL databases are non-relational, often schema-less, and prioritize flexibility and horizontal scalability for unstructured or changing data models."
+    }
+  ],
+  "dsa": [
+    {
+      "question": "What is recursion?",
+      "keywords": ["recursion", "function", "self call", "base case", "stack"],
+      "ideal_answer": "Recursion is a technique where a function calls itself to solve a smaller instance of the same problem. It requires a base case to stop the repeated calls and is commonly used for tasks like tree traversal and divide-and-conquer algorithms."
+    },
+    {
+      "question": "Difference between array and linked list",
+      "keywords": ["array", "linked list", "random access", "dynamic", "memory"],
+      "ideal_answer": "An array stores elements in contiguous memory and provides fast random access by index, while a linked list stores elements in nodes connected by pointers and supports efficient insertions or deletions at arbitrary positions. Arrays have fixed size, while linked lists can grow dynamically."
+    },
+    {
+      "question": "What is binary search?",
+      "keywords": ["binary search", "sorted", "divide and conquer", "log n", "midpoint"],
+      "ideal_answer": "Binary search is a search algorithm for sorted arrays that repeatedly divides the search interval in half. It compares the target value to the midpoint and eliminates half of the remaining elements each step, achieving logarithmic time complexity."
+    },
+    {
+      "question": "What is hash table?",
+      "keywords": ["hash table", "hashing", "key", "value", "collision"],
+      "ideal_answer": "A hash table is a data structure that maps keys to values using a hash function to compute an index. It enables fast average-time lookups, inserts, and deletes, and typically handles collisions with chaining or open addressing."
+    }
+  ],
+  "development": [
+    {
+      "question": "Explain the difference between HTTP GET and POST methods.",
+      "keywords": ["GET", "POST", "idempotent", "safe", "body", "parameters"],
+      "ideal_answer": "GET retrieves data and is safe and idempotent, with parameters typically sent in the URL. POST sends data to create or update resources, includes a request body, and is not idempotent because it can change server state."
+    },
+    {
+      "question": "What is REST and what are its main constraints?",
+      "keywords": ["REST", "stateless", "resources", "HTTP", "uniform interface", "cache"],
+      "ideal_answer": "REST is an architectural style for building APIs around resources using standard HTTP methods. Its constraints include statelessness, a uniform interface, resource-based URIs, and support for caching."
+    },
+    {
+      "question": "What is version control and why is it important?",
+      "keywords": ["version control", "Git", "history", "branches", "merge"],
+      "ideal_answer": "Version control tracks changes to files, enables collaboration, maintains history, and supports branching and merging. It makes development safer and easier to manage."
+    },
+    {
+      "question": "What is caching and why is it useful?",
+      "keywords": ["cache", "performance", "latency", "hit", "miss"],
+      "ideal_answer": "Caching stores frequently accessed data in a fast temporary layer, reducing latency and improving performance by avoiding repeated expensive operations."
+    },
+    {
+      "question": "What is a microservice architecture?",
+      "keywords": ["microservice", "independent", "scalability", "API", "services"],
+      "ideal_answer": "Microservice architecture breaks a large application into small, independent services that can be deployed and scaled separately and communicate over lightweight APIs."
+    },
+    {
+      "question": "What is microservices?",
+      "keywords": ["microservices", "services", "distributed", "modular"],
+      "ideal_answer": "Microservices are an architectural style where applications are built as a suite of small, independently deployable services, each owning a distinct business capability."
+    },
+    {
+      "question": "What is MVC architecture?",
+      "keywords": ["MVC", "model", "view", "controller", "separation of concerns"],
+      "ideal_answer": "MVC is an architectural pattern that separates an application into Model, View, and Controller components. The Model manages data, the View displays UI, and the Controller handles input and coordinates updates."
+    },
+    {
+      "question": "What is JWT authentication?",
+      "keywords": ["JWT", "authentication", "token", "JSON Web Token", "stateless"],
+      "ideal_answer": "JWT authentication uses JSON Web Tokens to securely transmit claims between parties. After login, the server issues a signed token that the client sends with requests to prove identity without server-side session storage."
+    },
+    {
+      "question": "Difference between frontend and backend",
+      "keywords": ["frontend", "backend", "UI", "server", "client", "business logic"],
+      "ideal_answer": "The frontend is the client-side interface users interact with, while the backend is the server-side logic and data processing behind the scenes. Frontend handles presentation and user experience, and backend handles storage, business logic, and APIs."
+    },
+    {
+      "question": "What is OAuth and why is it used?",
+      "keywords": ["OAuth", "authorization", "token", "access", "third-party"],
+      "ideal_answer": "OAuth is an authorization framework that lets users grant third-party applications limited access to their resources without sharing credentials. It uses tokens to delegate permissions securely."
+    }
+  ]
+}
